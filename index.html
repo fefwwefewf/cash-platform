@@ -26,11 +26,11 @@
         <button class="btn" style="margin-top:15px; background:#222; font-size: 14px;" onclick="showWithdraw()">ВЫВЕСТИ ДЕНЬГИ 💳</button>
     </div>
 
-    <!-- РАЗОВОЕ ЗАДАНИЕ С ЛАЙКОМ -->
+    <!-- РАЗОВОЕ ЗАДАНИЕ С ЛАЙКОМ В ТВОЙ КАНАЛ -->
     <div class="task-card" id="like-task-block">
         <div class="task-title">👍 Поставить лайк на пост</div>
         <div class="task-reward">+$1.50</div>
-        <button id="like-btn" class="btn" onclick="startLikeTask('https://t.me/cash_platform')">Выполнить</button>
+        <button id="like-btn" class="btn" onclick="startLikeTask('https://t.me/CashView22')">Выполнить</button>
     </div>
 
     <div class="task-card">
@@ -77,7 +77,7 @@
         function startLikeTask(url) {
             window.open(url, '_blank');
             const btn = document.getElementById('like-btn');
-            btn.innerText = "ПОДТВЕРДИТЬ ЛАЙК";
+            btn.innerText = "ПОДТВЕРДИТЬ ВЫПОЛНЕНИЕ";
             btn.style.background = "#fb8c00";
             btn.onclick = finishLikeTask;
         }
