@@ -11,8 +11,7 @@
         .task-card { background: #1a1a1a; border-radius: 18px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
         .task-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
         .task-reward { color: #4caf50; font-size: 14px; margin-bottom: 15px; font-weight: bold; }
-        .btn { background: #0088cc; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
+        .btn { background: #0088cc; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
         .btn:disabled { background: #444; color: #888; }
         #video-container { display: none; margin-bottom: 15px; border-radius: 10px; overflow: hidden; }
         #withdraw-section { display: none; background: #1a1a1a; padding: 20px; border-radius: 20px; margin-top: 20px; border: 1px solid #333; }
@@ -30,7 +29,7 @@
     <div class="task-card">
         <div class="task-title">👍 Поставить лайк на пост</div>
         <div class="task-reward">+$1.50</div>
-        <button class="btn" onclick="openTaskLink('https://t.me/твой_канал', 1.5, this)">Выполнить</button>
+        <button id="like-btn-1" class="btn" onclick="openTaskLink('https://t.me/твой_канал', 1.5, this)">Выполнить</button>
     </div>
 
     <div class="task-card">
@@ -53,6 +52,28 @@
     <script>
         let balance = 0;
 
+        // ЛОГИКА СОХРАНЕНИЯ ДАННЫХ
+        function loadData() {
+            const savedBalance = localStorage.getItem('user_balance');
+            const lastVisit = localStorage.getItem('last_visit');
+            const now = new Date().getTime();
+
+            // Если заходили более 20 часов назад (20 * 60 * 60 * 1000 мс), сбрасываем
+            if (lastVisit && (now - lastVisit > 20 * 60 * 60 * 1000)) {
+                localStorage.clear();
+                balance = 0;
+            } else if (savedBalance) {
+                balance = parseFloat(savedBalance);
+            }
+            
+            document.getElementById('user-balance').innerText = balance.toFixed(2);
+            localStorage.setItem('last_visit', now); // Обновляем время захода
+        }
+
+        function saveData() {
+            localStorage.setItem('user_balance', balance);
+        }
+
         function openTaskLink(url, amount, btn) {
             window.open(url, '_blank');
             btn.innerText = "ПОДТВЕРДИТЬ ВЫПОЛНЕНИЕ";
@@ -60,6 +81,7 @@
             btn.onclick = function() {
                 balance += amount;
                 document.getElementById('user-balance').innerText = balance.toFixed(2);
+                saveData(); // Сохраняем!
                 btn.innerText = "✅ ВЫПОЛНЕНО";
                 btn.disabled = true;
                 btn.style.background = "#444";
@@ -84,6 +106,7 @@
                     iframe.src = "";
                     balance += 7.50;
                     document.getElementById('user-balance').innerText = balance.toFixed(2);
+                    saveData(); // Сохраняем!
                     btn.disabled = false;
                     btn.innerText = "СМОТРЕТЬ СНОВА (+$7.50)";
                 }
@@ -98,11 +121,14 @@
 
         function finalWithdraw() {
             if (balance < 50) {
-                alert("Ошибка! Вывод невозможен.\n\nМинимальная сумма: $50.00.\nВам не хватает еще $" + (50 - balance).toFixed(2));
+                alert("Ошибка! Минимальная сумма: $50.00.");
             } else {
-                alert("ВНИМАНИЕ!\n\nДля подтверждения личности и совершения первого вывода необходимо пригласить 15 друзей по вашей реферальной ссылке.");
+                alert("Для вывода необходимо пригласить 15 друзей!");
             }
         }
+
+        // Запускаем проверку при открытии
+        loadData();
     </script>
 </body>
 </html>
