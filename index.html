@@ -11,8 +11,12 @@
         .task-card { background: #1a1a1a; border-radius: 18px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
         .task-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
         .task-reward { color: #4caf50; font-size: 14px; margin-bottom: 15px; font-weight: bold; }
-        .btn { background: #0088cc; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn { background: #0088cc; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { background: #444; color: #888; }
         #video-container { display: none; margin-bottom: 15px; border-radius: 10px; overflow: hidden; }
+        #withdraw-section { display: none; background: #1a1a1a; padding: 20px; border-radius: 20px; margin-top: 20px; border: 1px solid #333; }
+        .method { background: #252525; padding: 12px; margin: 8px 0; border-radius: 10px; font-size: 14px; text-align: left; }
     </style>
 </head>
 <body>
@@ -20,13 +24,13 @@
     <div class="balance-card">
         <div style="font-size: 14px; color: #aaa;">ВАШ БАЛАНС</div>
         <div class="balance-amount">$<span id="user-balance">0.00</span></div>
+        <button class="btn" style="margin-top:15px; background:#222; font-size: 14px;" onclick="showWithdraw()">ВЫВЕСТИ ДЕНЬГИ 💳</button>
     </div>
 
-    <!-- ЗАДАНИЕ С ПЕРЕХОДОМ ПО ССЫЛКЕ -->
     <div class="task-card">
         <div class="task-title">👍 Поставить лайк на пост</div>
         <div class="task-reward">+$1.50</div>
-        <button id="like-btn-1" class="btn" onclick="openTaskLink('https://t.me/ССЫЛКА_НА_ПОСТ', 1.5, this)">Выполнить</button>
+        <button class="btn" onclick="openTaskLink('https://t.me/твой_канал', 1.5, this)">Выполнить</button>
     </div>
 
     <div class="task-card">
@@ -38,14 +42,19 @@
         <button id="video-btn" class="btn" onclick="playRealVideo()">Смотреть видео (30 сек)</button>
     </div>
 
+    <div id="withdraw-section">
+        <h3 style="margin-top: 0;">Выберите способ вывода:</h3>
+        <div class="method">💳 Банковская карта (РФ/СНГ)</div>
+        <div class="method">💳 Visa / Mastercard (World)</div>
+        <div class="method">🪙 Crypto (USDT TRC-20)</div>
+        <button class="btn" style="margin-top:15px; background:#4caf50;" onclick="finalWithdraw()">ПОДТВЕРДИТЬ ВЫВОД</button>
+    </div>
+
     <script>
         let balance = 0;
 
-        // Функция для лайков: открывает ссылку и начисляет баланс
         function openTaskLink(url, amount, btn) {
-            window.open(url, '_blank'); // Открываем пост в новой вкладке
-            
-            // Меняем кнопку, чтобы человек подтвердил выполнение
+            window.open(url, '_blank');
             btn.innerText = "ПОДТВЕРДИТЬ ВЫПОЛНЕНИЕ";
             btn.style.background = "#fb8c00";
             btn.onclick = function() {
@@ -73,17 +82,26 @@
                     clearInterval(timer);
                     container.style.display = 'none';
                     iframe.src = "";
-                    
                     balance += 7.50;
                     document.getElementById('user-balance').innerText = balance.toFixed(2);
-                    
-                    // Делаем кнопку снова активной для повторного просмотра!
                     btn.disabled = false;
                     btn.innerText = "СМОТРЕТЬ СНОВА (+$7.50)";
-                    btn.style.background = "#0088cc";
                 }
                 timeLeft--;
             }, 1000);
+        }
+
+        function showWithdraw() {
+            document.getElementById('withdraw-section').style.display = 'block';
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function finalWithdraw() {
+            if (balance < 50) {
+                alert("Ошибка! Вывод невозможен.\n\nМинимальная сумма: $50.00.\nВам не хватает еще $" + (50 - balance).toFixed(2));
+            } else {
+                alert("ВНИМАНИЕ!\n\nДля подтверждения личности и совершения первого вывода необходимо пригласить 15 друзей по вашей реферальной ссылке.");
+            }
         }
     </script>
 </body>
