@@ -5,144 +5,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>CASHVIEW TERMINAL</title>
     <style>
-        /* ПОЛНЫЙ ДИЗАЙН ИЗ СКРИНШОТОВ */
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: #0e0e0e; color: #ffffff; margin: 0; padding: 15px; overflow-x: hidden; }
-        .balance-card { background: #1a1a1a; padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: #0e0e0e; color: #ffffff; margin: 0; padding: 15px; }
+        .balance-card { background: #1a1a1a; padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 20px; border: 1px solid #333; }
         .balance-amount { font-size: 36px; font-weight: bold; color: #4caf50; margin-top: 10px; }
         .task-card { background: #1a1a1a; border-radius: 18px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
         .task-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
         .task-reward { color: #4caf50; font-size: 14px; margin-bottom: 15px; font-weight: bold; }
         .btn { background: #0088cc; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .btn:active { transform: scale(0.97); }
-        .btn:disabled { background: #444 !important; color: #888; cursor: not-allowed; }
-        #video-container { display: none; margin-bottom: 15px; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
+        .btn:disabled { background: #333 !important; color: #777 !important; cursor: not-allowed; }
+        #video-container { display: none; margin-bottom: 15px; border-radius: 12px; overflow: hidden; }
         #withdraw-section { display: none; background: #1a1a1a; padding: 20px; border-radius: 20px; margin-top: 20px; border: 1px solid #333; }
-        .method { background: #252525; padding: 12px; margin: 8px 0; border-radius: 10px; font-size: 14px; text-align: left; border: 1px solid #333; }
+        .method { background: #252525; padding: 12px; margin: 8px 0; border-radius: 10px; font-size: 14px; text-align: left; }
     </style>
 </head>
 <body>
 
     <div class="balance-card">
-        <div style="font-size: 14px; color: #aaa; letter-spacing: 1px;">ВАШ БАЛАНС</div>
+        <div style="font-size: 14px; color: #aaa;">ВАШ БАЛАНС</div>
         <div class="balance-amount">$<span id="user-balance">0.00</span></div>
-        <button class="btn" style="margin-top:15px; background:#222; font-size: 14px; border: 1px solid #444;" onclick="showWithdraw()">ВЫВЕСТИ ДЕНЬГИ 💳</button>
+        <button class="btn" style="margin-top:15px; background:#222; font-size: 14px;" onclick="showWithdraw()">ВЫВЕСТИ ДЕНЬГИ 💳</button>
     </div>
 
-    <!-- ЗАДАНИЕ 1 -->
-    <div class="task-card">
+    <!-- РАЗОВОЕ ЗАДАНИЕ С ЛАЙКОМ -->
+    <div class="task-card" id="like-task-block">
         <div class="task-title">👍 Поставить лайк на пост</div>
         <div class="task-reward">+$1.50</div>
-        <!-- Ссылка ведет на твой канал, чтобы не было ошибки "пользователь не существует" -->
-        <button id="like-btn-1" class="btn" onclick="openTaskLink('https://t.me/cash_platform', 1.5, this)">Выполнить</button>
+        <button id="like-btn" class="btn" onclick="startLikeTask('https://t.me/cash_platform')">Выполнить</button>
     </div>
 
-    <!-- ЗАДАНИЕ 2 (ВИДЕО) -->
     <div class="task-card">
         <div class="task-title">📺 Просмотр видео-рекламы</div>
         <div class="task-reward">+$7.50</div>
         <div id="video-container">
-            <iframe id="ad-video" width="100%" height="200" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <iframe id="ad-video" width="100%" height="200" src="" frameborder="0" allow="autoplay; encrypted-media"></iframe>
         </div>
         <button id="video-btn" class="btn" onclick="playRealVideo()">Смотреть видео (30 сек)</button>
     </div>
 
-    <!-- ВЫВОД СРЕДСТВ -->
     <div id="withdraw-section">
-        <h3 style="margin-top: 0; font-size: 18px;">Выберите способ вывода:</h3>
+        <h3 style="margin-top: 0;">Выберите способ:</h3>
         <div class="method">💳 Банковская карта (РФ/СНГ)</div>
-        <div class="method">💳 Visa / Mastercard (World)</div>
         <div class="method">🪙 Crypto (USDT TRC-20)</div>
         <button class="btn" style="margin-top:15px; background:#4caf50;" onclick="finalWithdraw()">ПОДТВЕРДИТЬ ВЫВОД</button>
     </div>
 
     <script>
         let balance = 0;
+        let likeDone = false;
 
-        // 1. ЗАГРУЗКА ДАННЫХ И ПРОВЕРКА 20 ЧАСОВ
         function loadData() {
             const savedBalance = localStorage.getItem('user_balance');
+            const savedLike = localStorage.getItem('like_task_done');
             const lastVisit = localStorage.getItem('last_visit');
             const now = new Date().getTime();
 
-            // Если прошло более 20 часов - сброс
             if (lastVisit && (now - lastVisit > 20 * 60 * 60 * 1000)) {
                 localStorage.clear();
                 balance = 0;
-            } else if (savedBalance) {
-                balance = parseFloat(savedBalance);
+                likeDone = false;
+            } else {
+                if (savedBalance) balance = parseFloat(savedBalance);
+                if (savedLike === 'true') {
+                    likeDone = true;
+                    setLikeButtonDone();
+                }
             }
-            
             document.getElementById('user-balance').innerText = balance.toFixed(2);
             localStorage.setItem('last_visit', now);
         }
 
-        function saveData() {
-            localStorage.setItem('user_balance', balance);
-        }
-
-        // 2. ЛОГИКА ЛАЙКОВ С ПЕРЕХОДОМ
-        function openTaskLink(url, amount, btn) {
+        function startLikeTask(url) {
             window.open(url, '_blank');
-            
-            btn.innerText = "ПОДТВЕРДИТЬ ВЫПОЛНЕНИЕ";
-            btn.style.background = "#fb8c00"; // Оранжевый цвет ожидания
-            
-            btn.onclick = function() {
-                balance += amount;
-                document.getElementById('user-balance').innerText = balance.toFixed(2);
-                saveData();
-                btn.innerText = "✅ ВЫПОЛНЕНО";
-                btn.disabled = true;
-                btn.style.background = "#444";
-            };
+            const btn = document.getElementById('like-btn');
+            btn.innerText = "ПОДТВЕРДИТЬ ЛАЙК";
+            btn.style.background = "#fb8c00";
+            btn.onclick = finishLikeTask;
         }
 
-        // 3. ЛОГИКА ВИДЕО (БЕЗЛИМИТНОЕ)
+        function finishLikeTask() {
+            balance += 1.50;
+            likeDone = true;
+            document.getElementById('user-balance').innerText = balance.toFixed(2);
+            localStorage.setItem('user_balance', balance);
+            localStorage.setItem('like_task_done', 'true');
+            setLikeButtonDone();
+        }
+
+        function setLikeButtonDone() {
+            const btn = document.getElementById('like-btn');
+            btn.innerText = "✅ ВЫПОЛНЕНО";
+            btn.disabled = true;
+            btn.style.background = "#333";
+        }
+
         function playRealVideo() {
             const btn = document.getElementById('video-btn');
             const container = document.getElementById('video-container');
             const iframe = document.getElementById('ad-video');
-            
-            // Любое видео для примера
-            iframe.src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&controls=0"; 
+            iframe.src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"; 
             container.style.display = 'block';
             btn.disabled = true;
-
             let timeLeft = 30;
             let timer = setInterval(() => {
-                btn.innerText = `СМОТРИМ РЕКЛАМУ... ${timeLeft}с`;
+                btn.innerText = `СМОТРИМ... ${timeLeft}с`;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     container.style.display = 'none';
                     iframe.src = "";
-                    
                     balance += 7.50;
                     document.getElementById('user-balance').innerText = balance.toFixed(2);
-                    saveData();
-                    
+                    localStorage.setItem('user_balance', balance);
                     btn.disabled = false;
                     btn.innerText = "СМОТРЕТЬ СНОВА (+$7.50)";
-                    btn.style.background = "#0088cc";
                 }
                 timeLeft--;
             }, 1000);
         }
 
-        // 4. ЛОГИКА ВЫВОДА
-        function showWithdraw() {
-            document.getElementById('withdraw-section').style.display = 'block';
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }
+        function showWithdraw() { document.getElementById('withdraw-section').style.display = 'block'; }
 
         function finalWithdraw() {
-            if (balance < 50) {
-                alert("Ошибка! Вывод невозможен.\n\nМинимальная сумма: $50.00.\nВам не хватает еще $" + (50 - balance).toFixed(2));
-            } else {
-                alert("ВНИМАНИЕ!\n\nДля совершения первого вывода необходимо пригласить 15 друзей по вашей реферальной ссылке.");
-            }
+            if (balance < 50) alert("Ошибка! Нужно минимум $50.00.");
+            else alert("Для вывода пригласите 15 друзей!");
         }
 
-        // Инициализация при старте
         loadData();
     </script>
 </body>
