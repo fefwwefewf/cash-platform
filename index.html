@@ -1,73 +1,47 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личный кабинет | Заработок</title>
-    <style>
-        body { background: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .card { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .balance-title { color: #888; font-size: 14px; text-transform: uppercase; }
-        .balance-amount { font-size: 42px; font-weight: bold; color: #00ff88; margin: 10px 0; }
-        .btn-work { background: linear-gradient(45deg, #00c6ff, #0072ff); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
-        .btn-withdraw { background: transparent; border: 1px solid #555; color: #888; padding: 10px; border-radius: 10px; width: 100%; margin-top: 10px; cursor: pointer; }
+<!-- Секция с видео (вставь это вместо старой карточки с видео) -->
+<div class="task-card">
+    <div class="task-title">📺 Просмотр видео-рекламы</div>
+    <div class="task-reward">Награда: $7.50</div>
+    
+    <!-- Само видео (скрыто по умолчанию) -->
+    <div id="video-container" style="display:none; margin-bottom:10px;">
+        <iframe id="ad-video" width="100%" height="200" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+
+    <button id="video-btn" class="btn" onclick="playRealVideo()">Смотреть видео (30 сек)</button>
+</div>
+
+<script>
+    let balance = 0; // Это твой текущий баланс
+
+    function playRealVideo() {
+        const btn = document.getElementById('video-btn');
+        const container = document.getElementById('video-container');
+        const iframe = document.getElementById('ad-video');
         
-        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 2px solid #0072ff; padding: 25px; border-radius: 20px; width: 80%; z-index: 100; box-shadow: 0 0 30px rgba(0,114,255,0.5); }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 90; }
-    </style>
-</head>
-<body>
+        // Ссылка на любое рекламное видео с YouTube (параметр autoplay=1 запустит его сразу)
+        // Можно заменить на свою ссылку
+        iframe.src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&controls=0"; 
+        
+        container.style.display = 'block';
+        btn.disabled = true;
 
-    <div class="card">
-        <div class="balance-title">Ваш текущий баланс</div>
-        <div class="balance-amount">$<span id="cash">0</span></div>
-        <div style="color: #00c6ff; font-size: 12px;">Статус портфеля: Активен</div>
-    </div>
-
-    <div class="card">
-        <h3>Доступное задание</h3>
-        <p style="color: #bbb;">Просмотр рекламного блока (30 сек)</p>
-        <button class="btn-work" onclick="startWork()">Смотреть и заработать $5</button>
-    </div>
-
-    <button class="btn-withdraw" onclick="showWithdraw()">Вывести средства</button>
-
-    <div id="overlay"></div>
-    <div id="modal">
-        <h2 style="color: #ff4444;">Ошибка вывода</h2>
-        <p id="modal-text"></p>
-        <button class="btn-work" onclick="closeModal()">Принять условия</button>
-    </div>
-
-    <script>
-        let balance = 0;
-
-        function startWork() {
-            alert("Подключение к рекламному серверу...");
-            setTimeout(() => {
-                balance += 5;
-                document.getElementById('cash').innerText = balance;
-                alert("Просмотр засчитан! Начислено $5");
-            }, 2500);
-        }
-
-        function showWithdraw() {
-            if (balance < 50) {
-                alert("Минимальный вывод от $50. Продолжайте работу.");
-                return;
+        let timeLeft = 30;
+        let timer = setInterval(() => {
+            btn.innerText = `Смотрим рекламу... ${timeLeft}с`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                container.style.display = 'none';
+                iframe.src = ""; // Выключаем видео
+                
+                // Начисляем деньги
+                balance += 7.50;
+                document.getElementById('user-balance').innerText = balance.toFixed(2);
+                
+                btn.innerText = "✅ Начислено +$7.50";
+                btn.style.background = "#4caf50";
             }
-            document.getElementById('modal-text').innerHTML = 
-                `Для вывода суммы <b>$${balance}</b> необходимо подтвердить активность аккаунта:<br><br>` +
-                `• Пригласить <b>15 друзей</b> (вывод мгновенно)<br>` +
-                `• Или дождаться ручной проверки (<b>10 рабочих дней</b>)`;
-            document.getElementById('modal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+            timeLeft--;
+        }, 1000);
+    }
+</script>
